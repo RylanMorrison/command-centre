@@ -13,13 +13,12 @@ class Rain:
   # Construct an audio buffer from an MP3 file
   def _audio_buffer(self, file_path):
     audio = AudioSegment.from_mp3(file_path)
-    buffer = sa.play_buffer(
+    return sa.play_buffer(
       audio.raw_data,
       num_channels=audio.channels,
       bytes_per_sample=audio.sample_width,
       sample_rate=audio.frame_rate
     )
-    return buffer
   
   def _wait_for_audio(self, buffer):
     buffer.wait_done()
@@ -27,15 +26,16 @@ class Rain:
   # Listen for voice commands while the audio is playing
   def _listen_while_playing(self):
     while not self.stop_event.is_set():
-      time.sleep(10)
-      with self.microphone as source: audio = self.recognizer.listen(source)
+      time.sleep(30)
+      with self.microphone as source:
+        audio = self.recognizer.listen(source)
       try:
         value = self.recognizer.recognize_google(audio)
         if value == 'stop now': self.stop_event.set()
       except sr.UnknownValueError:
-        print("Didn't catch that, try again.")
-      except sr.RequestError:
-        pass
+        continue
+      except sr.RequestError as e:
+        print(e)
 
   # Use threads to play rain sounds and listen for commands
   def play_rain(self, max_play_count):

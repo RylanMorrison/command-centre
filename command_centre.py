@@ -12,15 +12,14 @@ class CommandCentre:
 
   def _play_shutdown(self):
     shutdown_sound = sa.WaveObject.from_wave_file("./assets/shutdown.wav")
-    play_shutdown = shutdown_sound.play()
-    play_shutdown.wait_done()
+    shutdown_sound.play().wait_done()
 
   def run(self):
     try:
       with self.microphone as source:
         self.recognizer.adjust_for_ambient_noise(source) # calibrate
       while True:
-        time.sleep(0.5)
+        time.sleep(1)
         with self.microphone as source:
           audio = self.recognizer.listen(source)
         try:
@@ -43,12 +42,12 @@ class CommandCentre:
             print(value)
         except sr.UnknownValueError:
           print("Didn't catch that, try again.")
-        except sr.RequestError:
-          pass
+        except sr.RequestError as e:
+          print(e)
     except KeyboardInterrupt:
       return
 
 if __name__ == "__main__":
-  print("Command Centre is running. Say 'help' for commands.")
+  print("Command Centre is running. Say 'help me' for commands.")
   CommandCentre().run()
-  print("Command Centre has stopped.")
+  print('Command Centre has stopped.')

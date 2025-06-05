@@ -14,7 +14,7 @@ Experimenting with Python voice recognition to build a personal collection of vo
   - Run `source venv/bin/activate`
 
 - Install dependencies
-  - Run `pip install -r requirements.txt`xw
+  - Run `pip install -r requirements.txt`
 
 - Microphone
   - You may need to configure your microphone settings or input volume for the voice commands to be interpreted comfortably
