@@ -16,6 +16,9 @@ Experimenting with Python voice recognition to build a personal collection of vo
 - Install dependencies
   - Run `pip install -r requirements.txt`
 
+- Vosk
+  - Download a model from https://alphacephei.com/vosk/models, create a `model` folder in the root of the project and put the model files in to it
+
 - Microphone
   - You may need to configure your microphone settings or input volume for the voice commands to be interpreted comfortably
 
@@ -38,3 +41,5 @@ See `modules/rain.py`. Uses threads to play the rain sound files found in `asset
 Voice commands with more than one syllable are more reliably interpreted
 
 Playback using local sound files works when the screen is locked (unlike YouTube videos for example) and removes any online dependency
+
+Using [Vosk](https://github.com/alphacep/vosk-api) for offline speech recognition also removes any online dependency

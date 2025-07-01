@@ -3,7 +3,12 @@
 import speech_recognition as sr
 import simpleaudio as sa
 import time
+import json
 from modules.rain import Rain
+
+# suppress vosk logs
+from vosk import SetLogLevel
+SetLogLevel(-1)
 
 class CommandCentre:
   def __init__(self):
@@ -23,17 +28,17 @@ class CommandCentre:
         with self.microphone as source:
           audio = self.recognizer.listen(source)
         try:
-          value = self.recognizer.recognize_google(audio)
+          value = json.loads(self.recognizer.recognize_vosk(audio))['text']
 
-          if value == 'make it rain':
-            Rain(self.recognizer, self.microphone).play_rain(3)
+          if value == 'play rain':
+            Rain(self.recognizer, self.microphone).play_rain(4)
           elif value == 'shut down':
             self._play_shutdown()
             break
           elif value == 'help me':
             print(
               "\nAvailable commands:\n"
-              "- 'make it rain': Start the playback of rain.\n"
+              "- 'play rain': Start the playback of rain.\n"
               "- 'stop now': Stop the playback of rain.\n"
               "- 'shut down': Shutdown the Command Centre.\n"
               "- 'help me': Show this help message.\n"
