@@ -25,30 +25,35 @@ class CommandCentre:
         self.recognizer.adjust_for_ambient_noise(source) # calibrate
       while True:
         time.sleep(1)
+
         with self.microphone as source:
           audio = self.recognizer.listen(source)
-        try:
-          value = json.loads(self.recognizer.recognize_vosk(audio))['text']
+          try:
+            value = json.loads(self.recognizer.recognize_vosk(audio))['text']
+          except sr.UnknownValueError:
+            print("Didn't catch that, try again.")
+            continue
+          except sr.RequestError as e:
+            print(e)
+            continue
 
-          if value == 'play rain':
-            Rain(self.recognizer, self.microphone).play_rain(4)
-          elif value == 'shut down':
-            self._play_shutdown()
-            break
-          elif value == 'help me':
-            print(
-              "\nAvailable commands:\n"
-              "- 'play rain': Start the playback of rain.\n"
-              "- 'stop now': Stop the playback of rain.\n"
-              "- 'shut down': Shutdown the Command Centre.\n"
-              "- 'help me': Show this help message.\n"
-            )
-          else:
-            print(value)
-        except sr.UnknownValueError:
-          print("Didn't catch that, try again.")
-        except sr.RequestError as e:
-          print(e)
+        if value == 'play rain':
+          Rain(self.recognizer, self.microphone).play_rain(4)
+        elif value == 'shut down':
+          print('Shutting down')
+          self._play_shutdown()
+          break
+        elif value == 'help me':
+          print(
+            "\nAvailable commands:\n"
+            "- 'play rain': Start the playback of rain.\n"
+            "- 'stop now': Stop the playback of rain.\n"
+            "- 'shut down': Shutdown the Command Centre.\n"
+            "- 'help me': Show this help message.\n"
+          )
+        else:
+          print(value)
+
     except KeyboardInterrupt:
       return
 
