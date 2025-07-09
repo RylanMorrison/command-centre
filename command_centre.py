@@ -37,8 +37,8 @@ class CommandCentre:
             print(e)
             continue
 
-        if value == 'play rain':
-          Rain(self.recognizer, self.microphone).play_rain(4)
+        if 'rain' in value:
+          Rain().play(4)
         elif value == 'shut down':
           print('Shutting down')
           self._play_shutdown()
@@ -46,8 +46,7 @@ class CommandCentre:
         elif value == 'help me':
           print(
             "\nAvailable commands:\n"
-            "- 'play rain': Start the playback of rain.\n"
-            "- 'stop now': Stop the playback of rain.\n"
+            "- 'rain': Start the playback of rain.\n"
             "- 'shut down': Shutdown the Command Centre.\n"
             "- 'help me': Show this help message.\n"
           )

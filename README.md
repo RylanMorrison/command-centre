@@ -34,7 +34,7 @@ There is currently one functional utility
 
 ### Rain
 
-See `modules/rain.py`. Uses threads to play the rain sound files found in `assets/`. Say `make it rain` to start playback. Say `stop now` to stop playback at any time and return to the command centre. Command listening is staggered while sound is playing to save resources. You may have to speak louder to be heard over the sound. Playback loops 3 times for around 40 minutes total playback time.
+See `modules/rain.py`. Uses threads to play the rain sound files found in `assets/`. Say any phrase containing the word `rain` to start playback. Press `Ctrl-C` to stop playback and return to the command centre. Play count can be passed to `Rain.play` to loop the audio.
 
 ## Notes
 

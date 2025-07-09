@@ -1,17 +1,29 @@
-import speech_recognition as sr
 import simpleaudio as sa
-import time
-import threading
+from threading import Thread
 from pydub import AudioSegment
 
+RAIN_1_PATH = './assets/rain_1.mp3'
+RAIN_2_PATH = './assets/rain_2.mp3'
+
 class Rain:
-  def __init__(self, recognizer, microphone):
-    self.recognizer = recognizer
-    self.microphone = microphone
-    self.stop_event = threading.Event()
+  def _init_threads(self):
+    self.threads: list[Thread] = []
+    self._init_audio_buffers()
+
+    for buffer in self.audio_buffers:
+      self.threads.append(self._new_thread(buffer))
+
+  def _init_audio_buffers(self):
+    self.audio_buffers: list[sa.PlayObject] = [
+      self._audio_buffer(RAIN_1_PATH),
+      self._audio_buffer(RAIN_2_PATH)
+    ]
+
+  def _new_thread(self, audio_buffer) -> Thread:
+    return Thread(target=self._wait_for_audio, args=(audio_buffer,))
 
   # Construct an audio buffer from an MP3 file
-  def _audio_buffer(self, file_path):
+  def _audio_buffer(self, file_path) -> sa.PlayObject:
     audio = AudioSegment.from_mp3(file_path)
     return sa.play_buffer(
       audio.raw_data,
@@ -19,53 +31,36 @@ class Rain:
       bytes_per_sample=audio.sample_width,
       sample_rate=audio.frame_rate
     )
-  
+
   def _wait_for_audio(self, buffer):
     buffer.wait_done()
 
-  # Listen for voice commands while the audio is playing
-  def _listen_while_playing(self):
-    while not self.stop_event.is_set():
-      time.sleep(30)
-      with self.microphone as source:
-        audio = self.recognizer.listen(source)
-      try:
-        value = self.recognizer.recognize_google(audio)
-        if value == 'stop now': self.stop_event.set()
-      except sr.UnknownValueError:
-        continue
-      except sr.RequestError as e:
-        print(e)
+  def _stop_playback(self):
+    for buffer in self.audio_buffers:
+      buffer.stop()
 
-  # Use threads to play rain sounds and listen for commands
-  def play_rain(self, max_play_count):
+  def _start_threads(self):
+    for thread in self.threads:
+      thread.start()
+
+  def _wait_for_threads(self):
+    for thread in self.threads:
+      thread.join()
+    print('Rain stopped')
+
+  # Use threads to play the sounds of rain
+  def play(self, max_play_count):
+    print("It's raining")
     play_count = 0
     while play_count < max_play_count:
-      self.stop_event.clear()
-      rain_1 = self._audio_buffer('./assets/rain_1.mp3')
-      rain_2 = self._audio_buffer('./assets/rain_2.mp3')
+      try:
+        self._init_threads()
+        self._start_threads()
 
-      rain_thread_1 = threading.Thread(target=self._wait_for_audio, args=(rain_1,))
-      rain_thread_2 = threading.Thread(target=self._wait_for_audio, args=(rain_2,))
-      listen_thread = threading.Thread(target=self._listen_while_playing)
-
-      rain_thread_1.start()
-      rain_thread_2.start()
-      listen_thread.start()
-
-      while True:
-        if self.stop_event.is_set():
-          # threads were commanded to stop
-          rain_1.stop()
-          rain_2.stop()
-          play_count = max_play_count # don't play again
-          break
-        if not rain_thread_1.is_alive() and not rain_thread_2.is_alive():
-          # threads stopped naturally
-          self.stop_event.set() # signal the listening thread to stop
-          break
-
-      rain_thread_1.join()
-      rain_thread_2.join()
-      listen_thread.join()
-      play_count += 1
+        self._wait_for_threads()
+        play_count += 1
+      except KeyboardInterrupt:
+        self._stop_playback()
+        self._wait_for_threads()
+        # don't play again
+        play_count = max_play_count
