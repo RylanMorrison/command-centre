@@ -2,6 +2,7 @@
 
 import speech_recognition as sr
 import simpleaudio as sa
+import sys
 import time
 import json
 from modules.rain import Rain
@@ -15,9 +16,11 @@ class CommandCentre:
     self.recognizer = sr.Recognizer()
     self.microphone = sr.Microphone()
 
-  def _play_shutdown(self):
+  def _shutdown(self):
+    print('Shutting down')
     shutdown_sound = sa.WaveObject.from_wave_file("./assets/shutdown.wav")
     shutdown_sound.play().wait_done()
+    sys.exit(0)
 
   def run(self):
     try:
@@ -28,21 +31,19 @@ class CommandCentre:
 
         with self.microphone as source:
           audio = self.recognizer.listen(source)
-          try:
-            value = json.loads(self.recognizer.recognize_vosk(audio))['text']
-          except sr.UnknownValueError:
-            print("Didn't catch that, try again.")
-            continue
-          except sr.RequestError as e:
-            print(e)
-            continue
+        try:
+          value = json.loads(self.recognizer.recognize_vosk(audio))['text']
+        except sr.UnknownValueError:
+          print("Didn't catch that, try again.")
+          continue
+        except sr.RequestError as e:
+          print(e)
+          continue
 
         if 'rain' in value:
           Rain().play(4)
         elif value == 'shut down':
-          print('Shutting down')
-          self._play_shutdown()
-          break
+          self._shutdown()
         elif value == 'help me':
           print(
             "\nAvailable commands:\n"

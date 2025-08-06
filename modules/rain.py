@@ -46,7 +46,6 @@ class Rain:
   def _wait_for_threads(self):
     for thread in self.threads:
       thread.join()
-    print('Rain stopped')
 
   # Use threads to play the sounds of rain
   def play(self, max_play_count):
@@ -64,3 +63,4 @@ class Rain:
         self._wait_for_threads()
         # don't play again
         play_count = max_play_count
+    print('Rain stopped')
